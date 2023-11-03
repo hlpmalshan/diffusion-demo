@@ -177,12 +177,17 @@ class DDPM(pl.LightningModule):
 
         return x_denoised
 
+    def isotropy(self, data):
+        iso = np.vdot(np.array(data), np.array(data)) / len(data)
+        return iso
+    
     def loss(self, x):
         '''Compute stochastic loss.'''
         # draw random time steps
         tids = torch.randint(0, self.num_steps, size=(x.shape[0], 1), device=x.device)
         ts = tids.to(x.dtype) + 1 # note that tidx = 0 corresponds to t = 1.0
-
+        regularizer = 10
+        
         # perform forward process steps
         x_noisy, eps = self.diffuse(x, tids, return_eps=True)
 
@@ -190,7 +195,7 @@ class DDPM(pl.LightningModule):
         eps_pred = self.eps_model(x_noisy, ts)
 
         # compute loss
-        loss = self.criterion(eps_pred, eps)
+        loss = self.criterion(eps_pred, eps) + regularizer*self.isotropy(x)
         return loss
 
     @staticmethod
