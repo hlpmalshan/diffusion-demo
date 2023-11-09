@@ -200,7 +200,8 @@ class DDPM(pl.LightningModule):
         eps_pred = self.eps_model(x_noisy, ts)
 
         # compute loss
-        loss = self.criterion(eps_pred, eps)
+        iso = self.isotropy(x_noisy)
+        loss = self.criterion(eps_pred, eps) + self.criterion(iso, 2)
         return loss
 
     @staticmethod
