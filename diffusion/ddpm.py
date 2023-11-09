@@ -185,7 +185,7 @@ class DDPM(pl.LightningModule):
         '''Compute stochastic loss.'''
         # draw random time steps
         rand_time = torch.randint(0, self.num_steps)
-        tids = torch.full((x.shape[0], 1), rand_time, device=x.device)
+        tids = torch.full(rand_time, size= (x.shape[0], 1), device=x.device)
 
         ## original code section
         # tids = torch.randint(0, self.num_steps, size=(x.shape[0], 1), device=x.device)
