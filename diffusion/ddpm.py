@@ -92,6 +92,14 @@ class DDPM(pl.LightningModule):
         x_noisy = (1 - beta).sqrt() * x + beta.sqrt() * eps
         return x_noisy
 
+    def diffuse_all_steps_till_time(self, x0, time):
+        '''Simulate and return all forward process steps.'''
+        x_noisy = torch.zeros(time + 1, *x0.shape, device=x0.device)
+        x_noisy[0] = x0
+        for tidx in range(time):
+            x_noisy[tidx + 1] = self.diffuse_step(x_noisy[tidx], tidx)
+        return x_noisy
+
     def diffuse_all_steps(self, x0):
         '''Simulate and return all forward process steps.'''
         x_noisy = torch.zeros(self.num_steps + 1, *x0.shape, device=x0.device)
@@ -197,20 +205,22 @@ class DDPM(pl.LightningModule):
         
         # perform forward process steps
         x_noisy, eps = self.diffuse(x, tids, return_eps=True)
+        x_noisy_prev = self.diffuse(x, tids - 1, return_eps=False)
 
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
+        
+        # iso calculation
+        iso_prev = self.isotropy(x_noisy_prev)
+        iso_ = self.isotropy(x_noisy)
+
+        iso_difference = iso_prev - iso_
+        relu_regularizer = nn.ReLU()
 
         # compute loss
-        iso = self.isotropy(x_noisy)
-        iso_array = np.arange(0, 2.1, 0.1)
-        indices = np.where(iso <= iso_array)[0]
-        if len(indices) == 0:
-            iso_ref = 2
-        else: 
-            index = indices[0]
-            iso_ref = iso_array[index]
-        loss = self.criterion(eps_pred, eps) + 0.5*(iso - iso_ref)**2
+        
+        lambda = 0.1
+        loss = self.criterion(eps_pred, eps) + lambda*relu_regularizer(iso_difference)
         return loss
 
     @staticmethod
