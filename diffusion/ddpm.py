@@ -203,7 +203,14 @@ class DDPM(pl.LightningModule):
 
         # compute loss
         iso = self.isotropy(x_noisy)
-        loss = self.criterion(eps_pred, eps) + 0.5*(iso - 2)**2
+        iso_array = np.array([0.5, 1.0, 1.5, 2.0])
+        indices = np.where(iso <= iso_array, iso_array)
+        if len(indices) == 0:
+            iso_ref = 2
+        else: 
+            index = indices[0]
+            iso_ref = iso_array[index]
+        loss = self.criterion(eps_pred, eps) + 0.5*(iso - iso_ref)**2
         return loss
 
     @staticmethod
