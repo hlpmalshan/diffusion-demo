@@ -122,6 +122,8 @@ class DDPM(pl.LightningModule):
             return x_noisy, eps
         else:
             return x_noisy
+    
+
 
     def denoise_step(self, x, tids, random_sample=False):
         '''Perform single reverse process step.'''
@@ -204,8 +206,8 @@ class DDPM(pl.LightningModule):
         ts = tids.to(x.dtype) + 1 # note that tidx = 0 corresponds to t = 1.0
         
         # perform forward process steps
-        x_noisy, eps = self.diffuse(x, tids, return_eps=True)
-        x_noisy_prev = self.diffuse(x, tids - 1, return_eps=False)
+        x_noisy, eps = self.diffuse(x, ts, return_eps=True)
+        x_noisy_prev = self.denoise_step(x_noisy, ts, random_sample=True)
 
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
@@ -218,7 +220,6 @@ class DDPM(pl.LightningModule):
         relu_regularizer = nn.ReLU()
 
         # compute loss
-        
         lambda = 0.1
         loss = self.criterion(eps_pred, eps) + lambda*relu_regularizer(iso_difference)
         return loss
