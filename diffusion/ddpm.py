@@ -180,7 +180,8 @@ class DDPM(pl.LightningModule):
         return x_denoised
 
     def isotropy(self, data):
-        iso = np.vdot(np.array(data), np.array(data)) / len(data)
+        data = torch.Tensor(data)
+        iso = torch.dot(data, data) / len(data)
         return iso
     
     def loss(self, x):
@@ -202,7 +203,6 @@ class DDPM(pl.LightningModule):
 
         # compute loss
         iso = self.isotropy(x_noisy)
-        iso.to(x.device)
         loss = self.criterion(eps_pred, eps) + self.criterion(iso, 2)
         return loss
 
