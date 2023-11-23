@@ -220,8 +220,8 @@ class DDPM(pl.LightningModule):
         relu_regularizer = nn.ReLU()
 
         # compute loss
-        lambda = 0.1
-        loss = self.criterion(eps_pred, eps) + lambda*relu_regularizer(iso_difference)
+        lamb = 0.1
+        loss = self.criterion(eps_pred, eps) + lamb*relu_regularizer(iso_difference)
         return loss
 
     @staticmethod
