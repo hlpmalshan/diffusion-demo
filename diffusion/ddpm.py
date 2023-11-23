@@ -218,7 +218,7 @@ class DDPM(pl.LightningModule):
         iso_ = self.isotropy(x_noisy)
 
         # iso_difference = iso_prev - iso_
-        # relu_regularizer = nn.ReLU()
+        relu_regularizer = nn.ReLU()
 
         # compute loss
         lamb = 0.1
