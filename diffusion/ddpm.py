@@ -222,7 +222,7 @@ class DDPM(pl.LightningModule):
 
         # compute loss
         lamb = 0.1
-        loss = self.criterion(eps_pred, eps) + lamb*relu_regularizer(iso_difference)
+        loss = self.criterion(eps_pred, eps) + lamb*np.max(0, iso_difference)
         return loss
 
     @staticmethod
