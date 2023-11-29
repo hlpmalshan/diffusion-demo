@@ -59,6 +59,12 @@ class DDPM(pl.LightningModule):
         # set initial learning rate
         self.lr = abs(lr)
 
+        # set arrays for iso_difference, eps_pred and eps
+        self.iso_difference_list = []             
+        self.eps_pred_list = []
+        self.eps_list = []             
+        
+
         # set scheduling parameters
         betas = torch.as_tensor(betas).view(-1) # note that betas[0] corresponds to t = 1.0
 
@@ -212,18 +218,33 @@ class DDPM(pl.LightningModule):
 
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
+
+        self.eps_pred_list.append(eps_pred.detach().cpu().numpy())
+        self.eps_list.append(eps.detach().cpu().numpy())
         
         # iso calculation
         iso_prev = self.isotropy(x_noisy_prev)
         iso_ = self.isotropy(x_noisy)
 
         iso_difference = iso_prev - iso_
+        self.iso_difference_list.append(iso_difference)
         relu_regularizer = nn.ReLU()
 
+        
+        
         # compute loss
         lamb = 1
         loss = self.criterion(eps_pred, eps) + lamb*np.maximum(0, iso_difference)
         return loss
+
+    def get_eps_pred_list(self):
+        return self.eps_pred_list
+
+    def get_eps_list(self):
+        return self.eps_list
+
+    def get_iso_difference_list(self):
+        return self.iso_difference_list
 
     @staticmethod
     def _get_features(batch):
