@@ -128,8 +128,6 @@ class DDPM(pl.LightningModule):
             return x_noisy, eps
         else:
             return x_noisy
-    
-
 
     def denoise_step(self, x, tids, random_sample=False):
         '''Perform single reverse process step.'''
