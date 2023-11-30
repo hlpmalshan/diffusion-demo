@@ -228,12 +228,10 @@ class DDPM(pl.LightningModule):
 
         iso_difference = iso_prev - iso_
         self.iso_difference_list.append(iso_difference)
-        relu_regularizer = nn.ReLU()
-
-        
+        relu_regularizer = nn.ReLU()        
         
         # compute loss
-        lamb = 1
+        lamb = 0
         loss = self.criterion(eps_pred, eps) + lamb*np.maximum(0, iso_difference)
         return loss
 
