@@ -62,7 +62,13 @@ class DDPM(pl.LightningModule):
         # set arrays for iso_difference, eps_pred and eps
         self.iso_difference_list = []             
         self.eps_pred_list = []
-        self.eps_list = []             
+        self.eps_list = []   
+
+
+        # to save losses
+        self.train_losses = []
+        self.val_losses = []
+          
         
 
         # set scheduling parameters
