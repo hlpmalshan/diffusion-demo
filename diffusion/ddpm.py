@@ -68,6 +68,9 @@ class DDPM(pl.LightningModule):
         # to save losses
         self.train_losses = []
         self.val_losses = []
+
+        # optimizer
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
           
         
 
@@ -296,9 +299,9 @@ class DDPM(pl.LightningModule):
     #     return loss
 
     # TODO: enable LR scheduling
-    def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-        return optimizer
+    # def configure_optimizers(self):
+    #     optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+    #     return optimizer
 
 
 class DDPM2d(DDPM):
