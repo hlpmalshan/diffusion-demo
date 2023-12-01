@@ -241,7 +241,7 @@ class DDPM(pl.LightningModule):
         self.iso_difference_list.append(iso_difference)       
         
         # compute loss
-        loss = self.criterion(eps_pred, eps) + self.lambda*np.maximum(0, iso_difference)
+        loss = self.criterion(eps_pred, eps) + self.lamb*np.maximum(0, iso_difference)
         return loss
 
     def train_step(self, x_batch):
