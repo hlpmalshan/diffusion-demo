@@ -234,7 +234,7 @@ class DDPM(pl.LightningModule):
         self.eps_list.append(eps.detach().cpu().numpy())
         
         # iso calculation
-        lamb = 2000
+        lamb = 500
         iso_prev = self.isotropy(x_noisy_prev)
         iso_ = self.isotropy(x_noisy)
 
