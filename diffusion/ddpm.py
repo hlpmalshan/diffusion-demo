@@ -244,7 +244,7 @@ class DDPM(pl.LightningModule):
         
         # compute loss
         loss = self.criterion(eps_pred, eps) + lamb*np.maximum(0, iso_difference)
-        loss = np.maximum(0, iso_difference)
+        # loss = np.maximum(0, iso_difference)
 
         # for just the loss with iso difference make sure it is a tensor with grad required
         # loss = torch.tensor(loss, requires_grad=True)
