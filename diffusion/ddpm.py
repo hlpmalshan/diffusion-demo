@@ -39,6 +39,7 @@ class DDPM(pl.LightningModule):
     def __init__(self,
                  eps_model,
                  betas,
+                 lamb,
                  criterion='mse',
                  lr=1e-04):
         super().__init__()
@@ -58,6 +59,9 @@ class DDPM(pl.LightningModule):
 
         # set initial learning rate
         self.lr = abs(lr)
+
+        # set isotropy regularizer parameter
+        self.lamb = lamb
 
         # set arrays for iso_difference, eps_pred and eps
         self.iso_difference_list = []             
@@ -234,12 +238,10 @@ class DDPM(pl.LightningModule):
         iso_ = self.isotropy(x_noisy)
 
         iso_difference = iso_prev - iso_
-        self.iso_difference_list.append(iso_difference)
-        relu_regularizer = nn.ReLU()        
+        self.iso_difference_list.append(iso_difference)       
         
         # compute loss
-        lamb = 1
-        loss = self.criterion(eps_pred, eps) + lamb*np.maximum(0, iso_difference)
+        loss = self.criterion(eps_pred, eps) + self.lambda*np.maximum(0, iso_difference)
         return loss
 
     def train_step(self, x_batch):
