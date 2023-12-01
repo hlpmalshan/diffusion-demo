@@ -39,7 +39,6 @@ class DDPM(pl.LightningModule):
     def __init__(self,
                  eps_model,
                  betas,
-                 lamb,
                  criterion='mse',
                  lr=1e-04):
         super().__init__()
@@ -61,7 +60,7 @@ class DDPM(pl.LightningModule):
         self.lr = abs(lr)
 
         # set isotropy regularizer parameter
-        self.lamb = lamb
+        self.lamb = 0
 
         # set arrays for iso_difference, eps_pred and eps
         self.iso_difference_list = []             
