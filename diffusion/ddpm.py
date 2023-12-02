@@ -210,10 +210,10 @@ class DDPM(pl.LightningModule):
         '''Generate random samples through the reverse process.'''
         x_denoised = torch.randn(num_samples, *sample_shape, device=self.device) # Lightning modules have a device attribute
         isotropy = []
-        for tidx in reversed(range(100)):
+        for tidx in reversed(range(250)):
             # generate random sample
             if tidx > 0:
-                x_denoised = self.denoise_step(x_denoised, 10*tidx, random_sample=True)
+                x_denoised = self.denoise_step(x_denoised, 4*tidx, random_sample=True)
                 iso = self.isotropy(x_denoised)
                 isotropy.append(iso)
             # take the mean in the last step
