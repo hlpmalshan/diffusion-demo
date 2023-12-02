@@ -217,7 +217,7 @@ class DDPM(pl.LightningModule):
                 x_denoised = self.denoise_step(x_denoised, tidx, random_sample=True)
                 iso = self.isotropy(x_denoised)
                 isotropy.append(iso)
-            if tidx > 0:
+            elif tidx > 0:
                 x_denoised = self.denoise_step(x_denoised, 2*tidx, random_sample=True)
                 iso = self.isotropy(x_denoised)
                 isotropy.append(iso)
