@@ -205,7 +205,8 @@ class DDPM(pl.LightningModule):
                 isotropy.append(iso)
 
         return x_denoised, isotropy
-
+    
+    @torch.no_grad()
     def fast_generate(self, sample_shape, num_samples=1):
         '''Generate random samples through the reverse process.'''
         x_denoised = torch.randn(num_samples, *sample_shape, device=self.device) # Lightning modules have a device attribute
