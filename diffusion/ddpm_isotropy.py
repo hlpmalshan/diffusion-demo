@@ -205,27 +205,6 @@ class DDPM(pl.LightningModule):
                 isotropy.append(iso)
 
         return x_denoised, isotropy
-    
-    @torch.no_grad()
-    def fast_generate(self, sample_shape, num_samples=1):
-        '''Generate random samples through the reverse process.'''
-        x_denoised = torch.randn(num_samples, *sample_shape, device=self.device) # Lightning modules have a device attribute
-        isotropy = []
-        for tidx in reversed(range(self.num_steps)):
-            # generate random sample
-            if tidx >= 600:
-                x_denoised = self.denoise_step(x_denoised, tidx, random_sample=True)
-                iso = self.isotropy(x_denoised)
-                isotropy.append(iso)
-                print('no')
-            # take the mean in the last step
-            else:
-                x_denoised, _ = self.denoise_step(x_denoised, tidx, random_sample=False)
-                iso = self.isotropy(x_denoised)
-                isotropy.append(iso)
-                print('oh no')
-
-        return x_denoised, isotropy
 
     def isotropy(self, data):
         data = data.detach().cpu().numpy()
@@ -234,13 +213,9 @@ class DDPM(pl.LightningModule):
     
     def loss(self, x):
         '''Compute stochastic loss.'''
-        # # draw random time steps
-        # rand_time = random.randint(0, self.num_steps - 1)
-        # tids = torch.full((x.shape[0], 1), rand_time, dtype=torch.int64, device=x.device)[0]
-        
-
-        ## original code section
-        tids = torch.randint(0, self.num_steps, size=(x.shape[0], 1), device=x.device)
+        # draw random time steps
+        rand_time = random.randint(0, self.num_steps - 1)
+        tids = torch.full((x.shape[0], 1), rand_time, dtype=torch.int64, device=x.device)[0]
         
         ts = tids.to(x.dtype) + 1 # note that tidx = 0 corresponds to t = 1.0
         
@@ -255,7 +230,7 @@ class DDPM(pl.LightningModule):
         self.eps_list.append(eps.detach().cpu().numpy())
         
         # iso calculation
-        lamb = 500
+        lamb = 1
         iso_prev = self.isotropy(x_noisy_prev)
         iso_ = self.isotropy(x_noisy)
 
@@ -286,25 +261,6 @@ class DDPM(pl.LightningModule):
 
     def get_iso_difference_list(self):
         return self.iso_difference_list
-
-    # @staticmethod
-    # def _get_features(batch):
-    #     '''Get only batch features and discard the rest.'''
-    #     if isinstance(batch, (tuple, list)):
-    #         x_batch = batch[0]
-    #     elif isinstance(batch, dict):
-    #         x_batch = batch['features']
-    #     elif isinstance(batch, torch.Tensor):
-    #         x_batch = batch
-    #     else:
-    #         raise TypeError('Invalid batch type encountered: {}'.format(type(batch)))
-    #     return x_batch
-
-    # def training_step(self, batch, batch_idx):
-    #     x_batch = self._get_features(batch)
-    #     loss = self.loss(x_batch)
-    #     self.log('train_loss', loss.item()) # Lightning logs batch-wise metrics during training per default
-    #     return loss
     
     def validate(self, val_loader):
         self.eval()
@@ -315,22 +271,10 @@ class DDPM(pl.LightningModule):
         avg_val_loss = val_loss / len(val_loader)
         return avg_val_loss
 
-    # def validation_step(self, batch, batch_idx):
-    #     x_batch = self._get_features(batch)
-    #     loss = self.loss(x_batch)
-    #     self.log('val_loss', loss.item()) # Lightning automatically averages metrics over batches for validation
-    #     return loss
-
-    # def test_step(self, batch, batch_idx):
-    #     x_batch = self._get_features(batch)
-    #     loss = self.loss(x_batch)
-    #     self.log('test_loss', loss.item()) # Lightning automatically averages metrics over batches for testing
-    #     return loss
-
     # TODO: enable LR scheduling
-    # def configure_optimizers(self):
-    #     optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-    #     return optimizer
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        return optimizer
 
 
 class DDPM2d(DDPM):
