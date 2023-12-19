@@ -223,6 +223,8 @@ class DDPM(pl.LightningModule):
         x_noisy, eps = self.diffuse(x, tids, return_eps=True)
         x_noisy_prev = self.denoise_step(x_noisy, tids, random_sample=True)
 
+        print(x.shape)
+
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
         
@@ -233,7 +235,7 @@ class DDPM(pl.LightningModule):
 
         # isotropy difference = denoised - noisy > 0
         iso_difference = iso_prev - iso_
-        self.iso_difference_list.append(iso_difference)       
+        # self.iso_difference_list.append(iso_difference)       
         
         # compute loss
         loss = self.criterion(eps_pred, eps) + lamb*torch.max(torch.tensor(0), iso_difference)
