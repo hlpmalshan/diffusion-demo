@@ -208,6 +208,7 @@ class DDPM(pl.LightningModule):
 
     def isotropy(self, data):
 
+        data = torch.squeeze(data)
         iso = torch.trace((data.T @ data)) / data.size(dim=0)
         return iso
     
