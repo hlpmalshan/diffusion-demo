@@ -253,7 +253,7 @@ class DDPM(pl.LightningModule):
         self.eps_list.append(eps.detach().cpu().numpy())
         
         # iso calculation
-        lamb = 0
+        lamb = 1
         iso_prev = self.isotropy(x_noisy_prev)
         iso_ = self.isotropy(x_noisy)
 
@@ -262,11 +262,11 @@ class DDPM(pl.LightningModule):
         self.iso_difference_list.append(iso_difference)       
         
         # compute loss
-        loss = self.criterion(eps_pred, eps) + lamb*np.maximum(0, iso_difference)
-        # loss = np.maximum(0, iso_difference)
+        # loss = self.criterion(eps_pred, eps) + lamb*np.maximum(0, iso_difference)
+        loss = np.maximum(0, iso_difference)
 
         # for just the loss with iso difference make sure it is a tensor with grad required
-        # loss = torch.tensor(loss, requires_grad=True)
+        loss = torch.tensor(loss, requires_grad=True)
         return loss
 
     def train_step(self, x_batch):
