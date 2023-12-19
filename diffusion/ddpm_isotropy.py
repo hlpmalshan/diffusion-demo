@@ -208,7 +208,7 @@ class DDPM(pl.LightningModule):
 
     def isotropy(self, data):
 
-        iso = torch.trace((data.T @ data)) / data.size(0)
+        iso = torch.trace((data.T @ data)) / data.size(dim=0)
         return iso
     
     def loss(self, x):
@@ -225,9 +225,6 @@ class DDPM(pl.LightningModule):
 
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
-
-        self.eps_pred_list.append(eps_pred.detach().cpu().numpy())
-        self.eps_list.append(eps.detach().cpu().numpy())
         
         # iso calculation
         lamb = 1
@@ -239,7 +236,7 @@ class DDPM(pl.LightningModule):
         self.iso_difference_list.append(iso_difference)       
         
         # compute loss
-        loss = self.criterion(eps_pred, eps) + lamb*torch.max(0, iso_difference)
+        loss = self.criterion(eps_pred, eps) + lamb*torch.max(torch.tensor(0), iso_difference)
         # loss = np.maximum(0, iso_difference)
 
         # for just the loss with iso difference make sure it is a tensor with grad required
