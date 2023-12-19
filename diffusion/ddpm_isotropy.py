@@ -228,7 +228,7 @@ class DDPM(pl.LightningModule):
         eps_pred = self.eps_model(x_noisy, ts)
         
         # iso calculation
-        lamb = 0.5
+        lamb = 0.1
         iso_prev = self.isotropy(x_noisy_prev)
         iso_ = self.isotropy(x_noisy)
 
