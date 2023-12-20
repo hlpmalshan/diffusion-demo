@@ -234,10 +234,11 @@ class DDPM(pl.LightningModule):
 
         # isotropy difference = denoised - noisy > 0
         iso_difference = iso_prev - iso_
+        iso_difference_term = nn.functional.relu(iso_difference)
         # self.iso_difference_list.append(iso_difference)       
         
         # compute loss
-        loss = self.criterion(eps_pred, eps) + lamb*torch.max(torch.tensor(0), iso_difference)
+        loss = self.criterion(eps_pred, eps) + lamb*iso_difference_term
         # loss = np.maximum(0, iso_difference)
 
         # for just the loss with iso difference make sure it is a tensor with grad required
