@@ -243,9 +243,6 @@ class DDPM(pl.LightningModule):
 
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
-
-        self.eps_pred_list.append(eps_pred.detach().cpu().numpy())
-        self.eps_list.append(eps.detach().cpu().numpy())  
         
         # compute loss
         loss = self.criterion(eps_pred, eps)
