@@ -233,11 +233,6 @@ class DDPM(pl.LightningModule):
     def loss(self, x):
         '''Compute stochastic loss.'''
         # # draw random time steps
-        # rand_time = random.randint(0, self.num_steps - 1)
-        # tids = torch.full((x.shape[0], 1), rand_time, dtype=torch.int64, device=x.device)[0]
-        
-
-        ## original code section
         tids = torch.randint(0, self.num_steps, size=(x.shape[0], 1), device=x.device)
         
         ts = tids.to(x.dtype) + 1 # note that tidx = 0 corresponds to t = 1.0
@@ -250,23 +245,11 @@ class DDPM(pl.LightningModule):
         eps_pred = self.eps_model(x_noisy, ts)
 
         self.eps_pred_list.append(eps_pred.detach().cpu().numpy())
-        self.eps_list.append(eps.detach().cpu().numpy())
-        
-        # iso calculation
-        lamb = 1
-        iso_prev = self.isotropy(x_noisy_prev)
-        iso_ = self.isotropy(x_noisy)
-
-        # isotropy difference = denoised - noisy > 0
-        iso_difference = iso_prev - iso_
-        self.iso_difference_list.append(iso_difference)       
+        self.eps_list.append(eps.detach().cpu().numpy())  
         
         # compute loss
-        # loss = self.criterion(eps_pred, eps) + lamb*np.maximum(0, iso_difference)
-        loss = np.maximum(0, iso_difference)
+        loss = self.criterion(eps_pred, eps)
 
-        # for just the loss with iso difference make sure it is a tensor with grad required
-        loss = torch.tensor(loss, requires_grad=True)
         return loss
 
     def train_step(self, x_batch):
