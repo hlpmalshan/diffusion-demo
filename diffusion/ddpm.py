@@ -250,7 +250,8 @@ class DDPM(pl.LightningModule):
         # target = torch.zeros_like(eps_pred, requires_grad=True)
         # loss = self.criterion(eps_pred, target) 
         loss = self.criterion(eps_pred, eps)
-        self.eps_pred_list.append(eps_pred.view())
+        eps_pred_clone = eps_pred.clone()
+        self.eps_pred_list.append(eps_pred_clone.detach())
         # loss = (squared_norm - dim)**2
         # loss = self.criterion(torch.sum(torch.square(eps_pred)), dim)
 
