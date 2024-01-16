@@ -254,7 +254,7 @@ class DDPM(pl.LightningModule):
         # loss = (squared_norm - dim)**2
         # loss = self.criterion(torch.sum(torch.square(eps_pred)), dim)
 
-        return loss, norms
+        return loss
 
     def train_step(self, x_batch):
         self.optimizer.zero_grad()
