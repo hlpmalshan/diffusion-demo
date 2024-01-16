@@ -69,6 +69,8 @@ class DDPM(pl.LightningModule):
         self.train_losses = []
         self.val_losses = []
 
+        self.norms = []
+
         # optimizer
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
           
@@ -248,7 +250,8 @@ class DDPM(pl.LightningModule):
         # target = torch.zeros_like(eps_pred, requires_grad=True)
         # loss = self.criterion(eps_pred, target) 
         loss = self.criterion(eps_pred, eps)
-        # squared_norm = torch.mean(torch.sum(eps_pred**2, dim=1))
+        squared_norm = torch.mean(torch.sum(eps_pred**2, dim=1))
+        self.norms.append(squared_norm)
         # loss = (squared_norm - dim)**2
         # loss = self.criterion(torch.sum(torch.square(eps_pred)), dim)
 
