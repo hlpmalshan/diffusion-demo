@@ -245,6 +245,7 @@ class DDPM(pl.LightningModule):
         
         # compute loss
         dim = torch.tensor(2.0, requires_grad=True)
+        target = torch.zeros_like(eps_pred, requires_grad=True)
         loss = self.criterion(eps_pred, 0) - dim
 
         return loss
