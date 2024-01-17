@@ -302,7 +302,8 @@ class DDPM(pl.LightningModule):
         val_loss = 0.0
         with torch.no_grad():
             for x_val_batch in val_loader:
-                val_loss += self.loss(torch.stack(x_val_batch)).item()
+                val_loss, _, _ = self.loss(torch.stack(x_val_batch)).item()
+                val_loss += val_loss
         avg_val_loss = val_loss / len(val_loader)
         return avg_val_loss
 
