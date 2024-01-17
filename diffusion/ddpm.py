@@ -246,7 +246,7 @@ class DDPM(pl.LightningModule):
         eps_pred = self.eps_model(x_noisy, ts)
 
         # Regularizer hyperparameter
-        reg = 0.1
+        reg = 0.01
         
         # compute loss
         
