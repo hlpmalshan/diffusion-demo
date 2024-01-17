@@ -271,7 +271,7 @@ class DDPM(pl.LightningModule):
 
         # compute kurtosis loss
         self.kurtosis_list.append(self.kurtosis(eps_pred))
-        kurtosis_loss = torch.mean(self.kurtosis(eps_pred))**2
+        kurtosis_loss = torch.mean(self.kurtosis(eps_pred)**2)
         
         norm_loss = self.criterion(squared_norm_preds, dim_)
         simple_diff_loss = self.criterion(eps_pred, eps)
