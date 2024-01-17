@@ -232,11 +232,11 @@ class DDPM(pl.LightningModule):
         iso = np.vdot(data, data) / len(data)
         return iso
 
-    def kurtosis(self, data):
+    def kurtosis(self, vectors):
         means = torch.mean(vectors, dim=1, keepdim=True)
         centered_vectors = vectors - means
-        fourth_moments = torch.mean(centered_vectors**4, dim=2)
-        variances = torch.mean(centered_vectors**2, dim=2)
+        fourth_moments = torch.mean(centered_vectors**4, dim=1)
+        variances = torch.mean(centered_vectors**2, dim=1)
         
         # Handling the case where variance is zero
         variances[variances == 0] = 0.001
