@@ -248,15 +248,14 @@ class DDPM(pl.LightningModule):
         self.eps_pred_list.append(eps_pred)
 
         # Regularizer hyperparameter
-        reg = 0.0
+        reg = 0.1
         
         # compute loss
         
-        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=1))
-        # dim_ = torch.tensor(2.0, requires_grad=True)
-        # target_dim = torch.one_like(squared_norm_preds, requires_grad=True)*dim_2
+        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
+        dim_ = torch.tensor(2.0, requires_grad=True)
         
-        norm_loss = (squared_norm_preds)
+        norm_loss = self.criterion(squared_norm_preds, dim_)
         simple_diff_loss = self.criterion(eps_pred, eps)
         
         loss = simple_diff_loss + reg*norm_loss
