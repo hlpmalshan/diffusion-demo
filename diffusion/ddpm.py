@@ -248,7 +248,7 @@ class DDPM(pl.LightningModule):
         self.eps_pred_list.append(eps_pred)
 
         # Regularizer hyperparameter
-        reg = 0.01
+        reg = 0.05
         
         # compute loss
         
