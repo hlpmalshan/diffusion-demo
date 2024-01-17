@@ -260,14 +260,14 @@ class DDPM(pl.LightningModule):
         loss = simple_diff_loss + reg*norm_loss
 
 
-        return loss
+        return loss, simple_diff_loss, norm_loss
 
     def train_step(self, x_batch):
         self.optimizer.zero_grad()
-        loss = self.loss(x_batch)
+        loss, simple_diff_loss, norm_loss = self.loss(x_batch)
         loss.backward()
         self.optimizer.step()
-        return loss.item()
+        return loss.item(), simple_diff_loss.item(), norm_loss.item()
 
     def get_eps_pred_list(self):
         return self.eps_pred_list
