@@ -71,6 +71,8 @@ class DDPM(pl.LightningModule):
 
         self.norms = []
 
+        self.kurtosis_list = []
+
         # optimizer
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
           
@@ -268,6 +270,7 @@ class DDPM(pl.LightningModule):
         dim_ = torch.tensor(2.0, requires_grad=True)
 
         # compute kurtosis loss
+        self.kurtosis_list.append(self.kurtosis(eps_pred))
         kurtosis_loss = torch.mean(self.kurtosis(eps_pred))**2
         
         norm_loss = self.criterion(squared_norm_preds, dim_)
