@@ -241,9 +241,11 @@ class DDPM(pl.LightningModule):
         
         # perform forward process steps
         x_noisy, eps = self.diffuse(x, tids, return_eps=True)
+        self.eps_list.append(eps)
 
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
+        self.eps_pred_list.append(eps_pred)
 
         # Regularizer hyperparameter
         reg = 0.0
