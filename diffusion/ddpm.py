@@ -263,7 +263,7 @@ class DDPM(pl.LightningModule):
 
         # Regularizer hyperparameter
         reg = 0.1
-        kurt_reg = 0.01
+        kurt_reg = 0.005
         
         # compute squared norm loss
         squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
