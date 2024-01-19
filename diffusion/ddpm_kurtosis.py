@@ -40,7 +40,9 @@ class DDPM(pl.LightningModule):
                  eps_model,
                  betas,
                  criterion='mse',
-                 lr=1e-04):
+                 lr=1e-04,
+                 reg=0.2,
+                 kurt_reg=0.01):
         super().__init__()
 
         # set trainable epsilon model
@@ -64,7 +66,10 @@ class DDPM(pl.LightningModule):
         self.eps_pred_list = []
         self.eps_list = []   
 
-
+        self.reg = reg
+        self.kurt_reg = kurt_reg
+        
+                     
         # to save losses
         self.train_losses = []
         self.val_losses = []
@@ -222,20 +227,9 @@ class DDPM(pl.LightningModule):
         
         # perform forward process steps
         x_noisy, eps = self.diffuse(x, tids, return_eps=True)
-        x_noisy_prev = self.denoise_step(x_noisy, tids, random_sample=True)
 
         # predict eps based on noisy x and t
-        eps_pred = self.eps_model(x_noisy, ts)
-        
-        # iso calculation
-        lamb = 1.0
-        iso_prev = self.isotropy(x_noisy_prev)
-        iso_ = self.isotropy(x_noisy)
-
-        # isotropy difference = denoised - noisy > 0
-        iso_difference = iso_prev - iso_
-        iso_difference_term = nn.functional.relu(iso_difference)
-        # self.iso_difference_list.append(iso_difference)       
+        eps_pred = self.eps_model(x_noisy, ts)     
         
         # compute loss
         loss = self.criterion(eps_pred, eps) + lamb*iso_difference_term
@@ -251,15 +245,6 @@ class DDPM(pl.LightningModule):
         loss.backward()
         self.optimizer.step()
         return loss.item()
-
-    def get_eps_pred_list(self):
-        return self.eps_pred_list
-
-    def get_eps_list(self):
-        return self.eps_list
-
-    def get_iso_difference_list(self):
-        return self.iso_difference_list
     
     def validate(self, val_loader):
         self.eval()
@@ -269,11 +254,6 @@ class DDPM(pl.LightningModule):
                 val_loss += self.loss(torch.stack(x_val_batch)).item()
         avg_val_loss = val_loss / len(val_loader)
         return avg_val_loss
-
-    # TODO: enable LR scheduling
-    def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-        return optimizer
 
 
 class DDPM2d(DDPM):
