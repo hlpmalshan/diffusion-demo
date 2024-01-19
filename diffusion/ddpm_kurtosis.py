@@ -69,7 +69,7 @@ class DDPM(pl.LightningModule):
         self.reg = reg
         self.kurt_reg = kurt_reg
         
-                     
+        self.kurtosis_list = []
         # to save losses
         self.train_losses = []
         self.val_losses = []
