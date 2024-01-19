@@ -264,7 +264,7 @@ class DDPM(pl.LightningModule):
         loss = self.loss(x_batch)
         loss.backward()
         self.optimizer.step()
-        return loss.item()
+        return loss.item(), simple_diff_loss.item(), norm_loss.item()
     
     def validate(self, val_loader):
         self.eval()
