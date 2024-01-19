@@ -213,41 +213,11 @@ class DDPM(pl.LightningModule):
 
         return x_denoised, isotropy
     
-    @torch.no_grad()
-    def fast_generate(self, sample_shape, num_samples=1):
-        '''Generate random samples through the reverse process.'''
-        x_denoised = torch.randn(num_samples, *sample_shape, device=self.device) # Lightning modules have a device attribute
-        isotropy = []
-        for tidx in reversed(range(self.num_steps)):
-            # generate random sample
-            if tidx >= 600:
-                x_denoised = self.denoise_step(x_denoised, tidx, random_sample=True)
-                iso = self.isotropy(x_denoised)
-                isotropy.append(iso)
-            # take the mean in the last step
-            else:
-                x_denoised, _ = self.denoise_step(x_denoised, tidx, random_sample=False)
-                iso = self.isotropy(x_denoised)
-                isotropy.append(iso)
-
-        return x_denoised, isotropy
 
     def isotropy(self, data):
         data = data.detach().cpu().numpy()
         iso = np.vdot(data, data) / len(data)
         return iso
-
-    def kurtosis(self, vectors):
-        means = torch.mean(vectors, dim=1, keepdim=True)
-        centered_vectors = vectors - means
-        fourth_moments = torch.mean(centered_vectors**4, dim=1)
-        variances = torch.mean(centered_vectors**2, dim=1)
-        
-        # Handling the case where variance is zero
-        variances[variances == 0] = 0.001
-        
-        kurtoses = fourth_moments / (variances**2) - 3
-        return kurtoses
     
     def loss(self, x):
         '''Compute stochastic loss.'''
