@@ -226,9 +226,7 @@ class DDPM(pl.LightningModule):
         eps_pred = self.eps_model(x_noisy, ts)
         self.eps_pred_list.append(eps_pred)
 
-        simple_diff_loss = self.criterion(eps_pred, eps)
-        
-        loss = simple_diff_loss 
+        loss = self.criterion(eps_pred, eps)
 
         return loss
 
