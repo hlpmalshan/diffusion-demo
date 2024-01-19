@@ -216,28 +216,44 @@ class DDPM(pl.LightningModule):
         data = torch.squeeze(data)
         iso = torch.trace((data.T @ data)) / data.size(dim=0)
         return iso
+
+    def kurtosis(self, vectors):
+        means = torch.mean(vectors, dim=1, keepdim=True)
+        centered_vectors = vectors - means
+        fourth_moments = torch.mean(centered_vectors**4, dim=1)
+        variances = torch.mean(centered_vectors**2, dim=1)
+
+        # Handling the case where variance is zero
+        variances[variances == 0] = 0.001
+
+        kurtoses = fourth_moments / (variances**2) - 3
+        return kurtoses
     
     def loss(self, x):
         '''Compute stochastic loss.'''
-        # draw random time steps
-        rand_time = random.randint(0, self.num_steps - 1)
-        tids = torch.full((x.shape[0], 1), rand_time, dtype=torch.int64, device=x.device)[0]
-        
+        # # draw random time steps
+        tids = torch.randint(0, self.num_steps, size=(x.shape[0], 1), device=x.device)
+
         ts = tids.to(x.dtype) + 1 # note that tidx = 0 corresponds to t = 1.0
-        
+
         # perform forward process steps
         x_noisy, eps = self.diffuse(x, tids, return_eps=True)
+        self.eps_list.append(eps)
 
         # predict eps based on noisy x and t
-        eps_pred = self.eps_model(x_noisy, ts)     
-        
-        # compute loss
-        loss = self.criterion(eps_pred, eps) + lamb*iso_difference_term
-        # loss = np.maximum(0, iso_difference)
+        eps_pred = self.eps_model(x_noisy, ts)
+        self.eps_pred_list.append(eps_pred)
 
-        # for just the loss with iso difference make sure it is a tensor with grad required
-        # loss = torch.tensor(loss, requires_grad=True)
-        return loss
+        # compute squared norm loss
+        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
+        dim_ = torch.tensor(2.0, requires_grad=True)
+
+        norm_loss = self.criterion(squared_norm_preds, dim_)
+        simple_diff_loss = self.criterion(eps_pred, eps)
+
+        loss = simple_diff_loss + self.reg*norm_loss 
+
+        return loss, simple_diff_loss, norm_loss
 
     def train_step(self, x_batch):
         self.optimizer.zero_grad()
