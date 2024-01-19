@@ -40,7 +40,9 @@ class DDPM(pl.LightningModule):
                  eps_model,
                  betas,
                  criterion='mse',
-                 lr=1e-04):
+                 lr=1e-04,
+                 reg=0.2,
+                 kurt_reg=0):
         super().__init__()
 
         # set trainable epsilon model
@@ -64,6 +66,10 @@ class DDPM(pl.LightningModule):
         self.eps_pred_list = []
         self.eps_list = []   
 
+
+        self.reg = reg
+        self.kurt_reg = kurt_reg
+                     
 
         # to save losses
         self.train_losses = []
@@ -260,24 +266,19 @@ class DDPM(pl.LightningModule):
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
         self.eps_pred_list.append(eps_pred)
-
-        # Regularizer hyperparameter
-        reg = 0.2
-        # kurt_reg = 0.005
         
         # compute squared norm loss
         squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
         dim_ = torch.tensor(2.0, requires_grad=True)
 
         # compute kurtosis loss
-        # self.kurtosis_list.append(self.kurtosis(eps_pred))
-        # kurtosis_loss = torch.norm(self.kurtosis(eps_pred))
+        self.kurtosis_list.append(self.kurtosis(eps_pred))
+        kurtosis_loss = torch.norm(self.kurtosis(eps_pred))
         
         norm_loss = self.criterion(squared_norm_preds, dim_)
         simple_diff_loss = self.criterion(eps_pred, eps)
         
-        loss = simple_diff_loss + reg*norm_loss
-        # + kurt_reg*kurtosis_loss
+        loss = simple_diff_loss + self.reg*norm_loss + self.kurt_reg*kurtosis_loss
 
         return loss, simple_diff_loss, norm_loss
 
