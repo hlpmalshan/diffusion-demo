@@ -68,10 +68,6 @@ class DDPM(pl.LightningModule):
         self.train_losses = []
         self.val_losses = []
 
-        self.norms = []
-
-        self.kurtosis_list = []
-
         # optimizer
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
           
@@ -251,25 +247,6 @@ class DDPM(pl.LightningModule):
 
     def get_iso_difference_list(self):
         return self.iso_difference_list
-
-    # @staticmethod
-    # def _get_features(batch):
-    #     '''Get only batch features and discard the rest.'''
-    #     if isinstance(batch, (tuple, list)):
-    #         x_batch = batch[0]
-    #     elif isinstance(batch, dict):
-    #         x_batch = batch['features']
-    #     elif isinstance(batch, torch.Tensor):
-    #         x_batch = batch
-    #     else:
-    #         raise TypeError('Invalid batch type encountered: {}'.format(type(batch)))
-    #     return x_batch
-
-    # def training_step(self, batch, batch_idx):
-    #     x_batch = self._get_features(batch)
-    #     loss = self.loss(x_batch)
-    #     self.log('train_loss', loss.item()) # Lightning logs batch-wise metrics during training per default
-    #     return loss
     
     def validate(self, val_loader):
         self.eval()
@@ -280,23 +257,6 @@ class DDPM(pl.LightningModule):
                 val_loss += val_loss
         avg_val_loss = val_loss / len(val_loader)
         return avg_val_loss
-
-    # def validation_step(self, batch, batch_idx):
-    #     x_batch = self._get_features(batch)
-    #     loss = self.loss(x_batch)
-    #     self.log('val_loss', loss.item()) # Lightning automatically averages metrics over batches for validation
-    #     return loss
-
-    # def test_step(self, batch, batch_idx):
-    #     x_batch = self._get_features(batch)
-    #     loss = self.loss(x_batch)
-    #     self.log('test_loss', loss.item()) # Lightning automatically averages metrics over batches for testing
-    #     return loss
-
-    # TODO: enable LR scheduling
-    # def configure_optimizers(self):
-    #     optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-    #     return optimizer
 
 
 class DDPM2d(DDPM):
