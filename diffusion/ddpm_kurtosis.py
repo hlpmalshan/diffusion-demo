@@ -41,8 +41,8 @@ class DDPM(pl.LightningModule):
                  betas,
                  criterion='mse',
                  lr=1e-04,
-                 reg,
-                 kurt_reg):
+                 reg=0.01,
+                 kurt_reg=0.01):
         super().__init__()
 
         # set trainable epsilon model
