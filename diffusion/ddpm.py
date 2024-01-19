@@ -226,16 +226,21 @@ class DDPM(pl.LightningModule):
         eps_pred = self.eps_model(x_noisy, ts)
         self.eps_pred_list.append(eps_pred)
 
+        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
+        dim_ = torch.tensor(2.0, requires_grad=True)
+        
+        norm_loss = self.criterion(squared_norm_preds, dim_)
+
         loss = self.criterion(eps_pred, eps)
 
-        return loss, loss, loss
+        return loss, loss, norm_loss
 
     def train_step(self, x_batch):
         self.optimizer.zero_grad()
         loss, simple_diff_loss, norm_loss = self.loss(x_batch)
         loss.backward()
         self.optimizer.step()
-        return loss.item(), loss.item(), loss.item()
+        return loss.item(), simple_diff_loss.item(), norm_loss.item()
 
     def get_eps_pred_list(self):
         return self.eps_pred_list
