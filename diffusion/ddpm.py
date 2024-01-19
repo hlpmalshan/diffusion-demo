@@ -40,9 +40,7 @@ class DDPM(pl.LightningModule):
                  eps_model,
                  betas,
                  criterion='mse',
-                 lr=1e-04,
-                 reg=0.2,
-                 kurt_reg=0):
+                 lr=1e-04):
         super().__init__()
 
         # set trainable epsilon model
@@ -64,12 +62,7 @@ class DDPM(pl.LightningModule):
         # set arrays for iso_difference, eps_pred and eps
         self.iso_difference_list = []             
         self.eps_pred_list = []
-        self.eps_list = []   
-
-
-        self.reg = reg
-        self.kurt_reg = kurt_reg
-                     
+        self.eps_list = []       
 
         # to save losses
         self.train_losses = []
@@ -215,43 +208,13 @@ class DDPM(pl.LightningModule):
                 isotropy.append(iso)
 
         return x_denoised, isotropy
-    
-    @torch.no_grad()
-    def fast_generate(self, sample_shape, num_samples=1):
-        '''Generate random samples through the reverse process.'''
-        x_denoised = torch.randn(num_samples, *sample_shape, device=self.device) # Lightning modules have a device attribute
-        isotropy = []
-        for tidx in reversed(range(self.num_steps)):
-            # generate random sample
-            if tidx >= 600:
-                x_denoised = self.denoise_step(x_denoised, tidx, random_sample=True)
-                iso = self.isotropy(x_denoised)
-                isotropy.append(iso)
-            # take the mean in the last step
-            else:
-                x_denoised, _ = self.denoise_step(x_denoised, tidx, random_sample=False)
-                iso = self.isotropy(x_denoised)
-                isotropy.append(iso)
 
-        return x_denoised, isotropy
 
     def isotropy(self, data):
         data = data.detach().cpu().numpy()
         iso = np.vdot(data, data) / len(data)
         return iso
-
-    def kurtosis(self, vectors):
-        means = torch.mean(vectors, dim=1, keepdim=True)
-        centered_vectors = vectors - means
-        fourth_moments = torch.mean(centered_vectors**4, dim=1)
-        variances = torch.mean(centered_vectors**2, dim=1)
         
-        # Handling the case where variance is zero
-        variances[variances == 0] = 0.001
-        
-        kurtoses = fourth_moments / (variances**2) - 3
-        return kurtoses
-    
     def loss(self, x):
         '''Compute stochastic loss.'''
         # # draw random time steps
@@ -266,28 +229,19 @@ class DDPM(pl.LightningModule):
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
         self.eps_pred_list.append(eps_pred)
-        
-        # compute squared norm loss
-        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
-        dim_ = torch.tensor(2.0, requires_grad=True)
 
-        # compute kurtosis loss
-        self.kurtosis_list.append(self.kurtosis(eps_pred))
-        kurtosis_loss = torch.norm(self.kurtosis(eps_pred))
-        
-        norm_loss = self.criterion(squared_norm_preds, dim_)
         simple_diff_loss = self.criterion(eps_pred, eps)
         
-        loss = simple_diff_loss + self.reg*norm_loss + self.kurt_reg*kurtosis_loss
+        loss = simple_diff_loss 
 
-        return loss, simple_diff_loss, norm_loss
+        return loss
 
     def train_step(self, x_batch):
         self.optimizer.zero_grad()
         loss, simple_diff_loss, norm_loss = self.loss(x_batch)
         loss.backward()
         self.optimizer.step()
-        return loss.item(), simple_diff_loss.item(), norm_loss.item()
+        return loss.item()
 
     def get_eps_pred_list(self):
         return self.eps_pred_list
