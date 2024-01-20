@@ -245,13 +245,15 @@ class DDPM(pl.LightningModule):
         self.eps_pred_list.append(eps_pred)
 
         # compute squared norm loss
-        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
         dim_ = torch.tensor(2.0, requires_grad=True)
+        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2)) / dim_
+
+        one = torch.tensor(1.0, requires_grad=True)
 
         # compute kurtosis loss
         kurtosis_loss = torch.norm(self.kurtosis(eps_pred))
 
-        norm_loss = self.criterion(squared_norm_preds, dim_)
+        norm_loss = self.criterion(squared_norm_preds, one)
         simple_diff_loss = self.criterion(eps_pred, eps)
         
         loss = simple_diff_loss + self.reg*norm_loss + self.kurt_reg*kurtosis_loss
