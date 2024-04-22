@@ -15,6 +15,7 @@ class DDPM(pl.LightningModule):
     Plain vanilla DDPM module.
 
     Summary
+    shakthi pol booruwa
     -------
     This module establishes a plain vanilla DDPM variant.
     It is basically a container and wrapper for an
