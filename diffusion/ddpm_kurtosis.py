@@ -73,6 +73,8 @@ class DDPM(pl.LightningModule):
         # to save losses
         self.train_losses = []
         self.val_losses = []
+        self.diff_losses = []
+        self.norm_losses = []
 
         # optimizer
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
