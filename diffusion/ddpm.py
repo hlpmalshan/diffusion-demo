@@ -227,8 +227,11 @@ class DDPM(pl.LightningModule):
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
         self.eps_pred_list.append(eps_pred)
-
+        
+        print("here")
         print(eps_pred)
+        print("here finished")
+        
         squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
         dim_ = torch.tensor(2.0, requires_grad=True)
         
