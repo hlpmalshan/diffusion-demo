@@ -228,12 +228,11 @@ class DDPM(pl.LightningModule):
         eps_pred = self.eps_model(x_noisy, ts)
         self.eps_pred_list.append(eps_pred)
         
-        print("here")
-        print(eps_pred)
-        print("here finished")
-        
-        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
-        dim_ = torch.tensor(2.0, requires_grad=True)
+        # squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
+        # dim_ = torch.tensor(2.0, requires_grad=True)
+
+        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=len(eps_pred.shape)-1))/len(x.shape[1:])
+        dim_ = torch.tensor(1.0, requires_grad=True)
         
         norm_loss = self.criterion(squared_norm_preds, dim_)
 
