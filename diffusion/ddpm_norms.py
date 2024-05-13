@@ -237,11 +237,7 @@ class DDPM(pl.LightningModule):
         self.eps_pred_list.append(eps_pred)
         
         # compute squared norm loss
-        # dim_ = torch.tensor(2.0, requires_grad=True)
-        # squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2)) / dim_
-
-        # one = torch.tensor(1.0, requires_grad=True)
-
+        
         squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=len(eps_pred.shape)-1))/len(x.shape[1:])
         dim_ = torch.tensor(1.0, requires_grad=True)
         
