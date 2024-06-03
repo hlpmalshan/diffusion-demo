@@ -60,15 +60,15 @@ class DDPM(pl.LightningModule):
         self.lr = abs(lr)
 
         # set arrays for iso_difference, eps_pred and eps
-        self.iso_difference_list = []             
-        self.eps_pred_list = []
-        self.eps_list = []       
+        # self.iso_difference_list = []             
+        # self.eps_pred_list = []
+        # self.eps_list = []       
 
         # to save losses
         self.train_losses = []
-        self.val_losses = []
-        self.diff_losses = []
-        self.norm_losses = []
+        # self.val_losses = []
+        # self.diff_losses = []
+        # self.norm_losses = []
 
         # optimizer
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
@@ -222,11 +222,11 @@ class DDPM(pl.LightningModule):
         
         # perform forward process steps
         x_noisy, eps = self.diffuse(x, tids, return_eps=True)
-        self.eps_list.append(eps)
+        # self.eps_list.append(eps)
 
         # predict eps based on noisy x and t
         eps_pred = self.eps_model(x_noisy, ts)
-        self.eps_pred_list.append(eps_pred)
+        # self.eps_pred_list.append(eps_pred)
         
         # squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2))
         # dim_ = torch.tensor(2.0, requires_grad=True)
