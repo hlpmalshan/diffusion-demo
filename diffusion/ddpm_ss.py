@@ -220,7 +220,7 @@ class DDPM(pl.LightningModule):
         # # draw random time steps
         iter_epoch_step = int(epochs*10/self.num_steps)
         uniform_limit = ((epoch//iter_epoch_step)+1)*self.iter_num_step 
-      
+        print(uniform_limit, epoch)
         tids = torch.randint(0, uniform_limit, size=(x.shape[0], 1), device=x.device)
         
         ts = tids.to(x.dtype) + 1 # note that tidx = 0 corresponds to t = 1.0
