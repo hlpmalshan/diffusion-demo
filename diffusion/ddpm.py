@@ -168,25 +168,26 @@ class DDPM(pl.LightningModule):
             x_denoised = x_denoised_mean + x_denoised_var.sqrt() * eps
 
         if random_sample:
-            return x_denoised
+            return x_denoised, eps_pred
         else:
-            return x_denoised_mean, x_denoised_var
+            return x_denoised_mean, x_denoised_var, eps_pred
 
     @torch.no_grad()
     def denoise_all_steps(self, xT):
         '''Perform and return all reverse process steps.'''
         x_denoised = torch.zeros(self.num_steps + 1, *(xT.shape), device=xT.device)
-
+        x_eps = torch.zeros(self.num_steps + 1, *(xT.shape), device=xT.device)
+        
         x_denoised[0] = xT
         for idx, tidx in enumerate(reversed(range(self.num_steps))):
             # generate random sample
             if tidx > 0:
-                x_denoised[idx + 1] = self.denoise_step(x_denoised[idx], tidx, random_sample=True)
+                x_denoised[idx + 1], x_eps[idx] = self.denoise_step(x_denoised[idx], tidx, random_sample=True)
             # take the mean in the last step
             else:
-                x_denoised[idx + 1], _ = self.denoise_step(x_denoised[idx], tidx, random_sample=False)
+                x_denoised[idx + 1], _, x_eps[idx] = self.denoise_step(x_denoised[idx], tidx, random_sample=False)
 
-        return x_denoised
+        return x_denoised, x_eps
 
     @torch.no_grad()
     def generate(self, sample_shape, num_samples=1):
