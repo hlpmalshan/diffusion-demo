@@ -142,7 +142,7 @@ class DDPM(pl.LightningModule):
     def denoise_step(self, x, tids, random_sample=False):
         '''Perform single reverse process step.'''
         # set up time variables
-        tids = torch.as_tensor(tids).view(-1, 1) # ensure (batch_size>=1, 1)-shaped tensor
+        tids = torch.as_tensor(tids, device=x.device).view(-1, 1) # ensure (batch_size>=1, 1)-shaped tensor
         ts = tids.to(x.dtype) + 1 # note that tidx = 0 corresponds to t = 1.0
 
         # predict eps based on noisy x and t
@@ -197,12 +197,12 @@ class DDPM(pl.LightningModule):
         for tidx in reversed(range(self.num_steps)):
             # generate random sample
             if tidx > 0:
-                x_denoised = self.denoise_step(x_denoised, tidx, random_sample=True)
+                x_denoised, _ = self.denoise_step(x_denoised, tidx, random_sample=True)
                 # iso = self.isotropy(x_denoised)
                 # isotropy.append(iso)
             # take the mean in the last step
             else:
-                x_denoised, _ = self.denoise_step(x_denoised, tidx, random_sample=False)
+                x_denoised, _, _ = self.denoise_step(x_denoised, tidx, random_sample=False)
                 # iso = self.isotropy(x_denoised)
                 # isotropy.append(iso)
 
