@@ -142,7 +142,7 @@ class DDPM(pl.LightningModule):
     def denoise_step(self, x, tids, random_sample=False):
         '''Perform single reverse process step.'''
         # set up time variables
-        tids = torch.as_tensor(tids, device=x.device).view(-1, 1) # ensure (batch_size>=1, 1)-shaped tensor
+        tids = torch.as_tensor(tids).view(-1, 1) # ensure (batch_size>=1, 1)-shaped tensor
         ts = tids.to(x.dtype) + 1 # note that tidx = 0 corresponds to t = 1.0
 
         # predict eps based on noisy x and t
