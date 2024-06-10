@@ -198,12 +198,12 @@ class DDPM(pl.LightningModule):
         for tidx in reversed(range(self.num_steps)):
             # generate random sample
             if tidx > 0:
-                x_denoised = self.denoise_step(x_denoised, tidx, random_sample=True)
+                x_denoised, _ = self.denoise_step(x_denoised, tidx, random_sample=True)
                 # iso = self.isotropy(x_denoised)
                 # isotropy.append(iso)
             # take the mean in the last step
             else:
-                x_denoised, _ = self.denoise_step(x_denoised, tidx, random_sample=False)
+                x_denoised, _, _ = self.denoise_step(x_denoised, tidx, random_sample=False)
                 # iso = self.isotropy(x_denoised)
                 # isotropy.append(iso)
 
