@@ -234,17 +234,16 @@ class DDPM(pl.LightningModule):
         # dim_ = torch.tensor(2.0, requires_grad=True)
 
         # frob_norm = torch.mean(torch.sum(eps_pred**2, dim=len(eps_pred.shape)-1))/len(x.shape[1:])
-        print(eps_pred.shape)
         covariance_matrix = torch.cov(eps_pred.T)
-        print(covariance_matrix)
         identity_matrix = torch.eye(eps_pred.shape[1], device=eps_pred.device)  
-        print(identity_matrix.shape)
-        print('here')
-        norm_loss = self.criterion(squared_norm_preds, identity_matrix)
+        
+        norm_loss = torch.norm(squared_norm_preds - identity_matrix)
 
-        loss = self.criterion(eps_pred, eps)
+        simple_diff_loss = self.criterion(eps_pred, eps)
 
-        return loss, loss, norm_loss
+        loss = simple_diff_loss + self.reg*norm_loss
+
+        return loss, simple_diff_loss, norm_loss
 
     def train_step(self, x_batch):
         self.optimizer.zero_grad()
