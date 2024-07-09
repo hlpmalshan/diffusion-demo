@@ -238,7 +238,7 @@ class DDPM(pl.LightningModule):
         identity_matrix = torch.eye(eps_pred.shape[1], device=eps_pred.device)  
         
         norm_loss_prev = torch.norm(covariance_matrix)**2
-        norm_loss = self.criterion(norm_loss_prev, torch.tensor(eps.shape[1], requires_grad=False))
+        norm_loss = self.criterion(norm_loss_prev, torch.tensor(eps.shape[1]).to(eps_pred.device))
         simple_diff_loss = self.criterion(eps_pred, eps)
 
         loss = simple_diff_loss + self.reg*norm_loss
