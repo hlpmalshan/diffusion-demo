@@ -41,7 +41,7 @@ class DDPM(pl.LightningModule):
                  betas,
                  criterion='mse',
                  lr=1e-04,
-                 reg=0):
+                 reg=0.0):
         super().__init__()
 
         # set trainable epsilon model
@@ -59,7 +59,7 @@ class DDPM(pl.LightningModule):
 
         # set initial learning rate
         self.lr = abs(lr)
-
+        self.reg = reg
         # set arrays for iso_difference, eps_pred and eps
         # self.iso_difference_list = []             
         # self.eps_pred_list = []
