@@ -234,7 +234,7 @@ class DDPM(pl.LightningModule):
         # dim_ = torch.tensor(2.0, requires_grad=True)
 
         # frob_norm = torch.mean(torch.sum(eps_pred**2, dim=len(eps_pred.shape)-1))/len(x.shape[1:])
-        covariance_matrix = torch.dot(eps_pred.T, eps_pred)/eps_pred.shape[0]
+        covariance_matrix = eps_pred.T@eps_pred/eps_pred.shape[0]
         identity_matrix = torch.eye(eps_pred.shape[1], device=eps_pred.device)  
         
         norm_loss = torch.norm(covariance_matrix - identity_matrix)**2
