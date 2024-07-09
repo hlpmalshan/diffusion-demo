@@ -1,4 +1,4 @@
-''Denoising diffusion model.'''
+'''Denoising diffusion model.'''
 
 import random
 import numpy as np
