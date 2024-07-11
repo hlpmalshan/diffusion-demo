@@ -237,9 +237,10 @@ class DDPM(pl.LightningModule):
         covariance_matrix = eps_pred.T@eps_pred/eps_pred.shape[0]
 
         lambdas = torch.sort(torch.linalg.eigvals(covariance_matrix).to(torch.float).cpu(), descending=True)
+        print(lambdas)
         iso_ratio = lambdas[0]/lambdas[1]
 
-        norm_loss = torch.criterion(iso_ratio.to(eps_pred.device), torch.tensor(1.0, dtype=eps_pred.dtype).to(eps_pred.device))
+        norm_loss = self.criterion(iso_ratio.to(eps_pred.device), torch.tensor(1.0, dtype=eps_pred.dtype).to(eps_pred.device))
 
         simple_diff_loss = self.criterion(eps_pred, eps)
 
