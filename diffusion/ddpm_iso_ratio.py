@@ -236,7 +236,7 @@ class DDPM(pl.LightningModule):
         # frob_norm = torch.mean(torch.sum(eps_pred**2, dim=len(eps_pred.shape)-1))/len(x.shape[1:])
         covariance_matrix = eps_pred.T@eps_pred/eps_pred.shape[0]
 
-        lambdas = torch.sort(torch.linalg.eigvals(covariance_matrix)to(torch.float).cpu(), descending=True)
+        lambdas = torch.sort(torch.linalg.eigvals(covariance_matrix).to(torch.float).cpu(), descending=True)
         iso_ratio = lambdas[0]/lambdas[1]
 
         norm_loss = torch.criterion(iso_ratio.to(eps_pred.device), torch.tensor(1.0, dtype=eps_pred.dtype).to(eps_pred.device))
