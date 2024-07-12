@@ -241,7 +241,7 @@ class DDPM(pl.LightningModule):
 
         iso_index = 1/2 * ((lambdas[0][0]/lambda_mean)-1)**2 + 1/2 * ((lambdas[0][1]/lambda_mean)-1)**2
 
-        norm_loss = self.criterion(iso_ratio.to(eps_pred.device), torch.tensor(0.0, dtype=eps_pred.dtype).to(eps_pred.device))
+        norm_loss = self.criterion(iso_index.to(eps_pred.device), torch.tensor(0.0, dtype=eps_pred.dtype).to(eps_pred.device))
 
         simple_diff_loss = self.criterion(eps_pred, eps)
 
