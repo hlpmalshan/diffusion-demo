@@ -240,7 +240,7 @@ class DDPM(pl.LightningModule):
 
         one = torch.tensor(1.0, requires_grad=True)
         
-        norm_loss = self.criterion(squared_norm_preds, one)
+        norm_loss = self.criterion(squared_norm_preds.to(eps_pred.device), one.to(eps_pred.device))
         simple_diff_loss = self.criterion(eps_pred, eps)
         
         loss = simple_diff_loss + self.reg*norm_loss 
