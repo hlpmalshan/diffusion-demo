@@ -73,8 +73,6 @@ class DDPM(pl.LightningModule):
         # to save losses
         self.train_losses = []
         self.val_losses = []
-        self.diff_losses = []
-        self.norm_losses = []
 
         self.norms = []
 
@@ -237,12 +235,12 @@ class DDPM(pl.LightningModule):
         self.eps_pred_list.append(eps_pred)
         
         # compute squared norm loss
+        dim_ = torch.tensor(2.0, requires_grad=True)
+        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=2)) / dim_
+
+        one = torch.tensor(1.0, requires_grad=True)
         
-        squared_norm_preds = torch.mean(torch.sum(eps_pred**2, dim=len(eps_pred.shape)-1)).to(eps_pred.device)/len(x.shape[1:])
-        dim_ = torch.tensor(1.0, requires_grad=True).to(eps_pred.device)
-        
-        norm_loss = self.criterion(squared_norm_preds, dim_)
-        # norm_loss = self.criterion(squared_norm_preds, one)
+        norm_loss = self.criterion(squared_norm_preds, one)
         simple_diff_loss = self.criterion(eps_pred, eps)
         
         loss = simple_diff_loss + self.reg*norm_loss 
