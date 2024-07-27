@@ -239,7 +239,7 @@ class DDPM(pl.LightningModule):
         diag_mean = (covariance_matrix[0][0] + covariance_matrix[1][1])/2
         diag_ratio = covariance_matrix[0][1]/diag_mean
         
-        norm_loss = self.criterion(diag_ratio, torch.tensor(1.0, dtype=eps_pred.dtype).to(eps_pred.device))
+        norm_loss = self.criterion(diag_ratio, torch.tensor(0.0, dtype=eps_pred.dtype).to(eps_pred.device))
 
         simple_diff_loss = self.criterion(eps_pred, eps)
 
