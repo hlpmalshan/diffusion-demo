@@ -237,9 +237,9 @@ class DDPM(pl.LightningModule):
         covariance_matrix = eps_pred.T@eps_pred/eps_pred.shape[0]
         covariance_square = torch.mm(covariance_matrix, covariance_matrix)
 
-        sphericity = torch.trace(covariance_matrix)/torch.trace(covariance_square)
+        sphericity = torch.tensor(2.0, dtype=eps_pred.dtype).to(eps_pred.device)*torch.trace(covariance_matrix)/torch.trace(covariance_square)
       
-        norm_loss = self.criterion(sphericity, torch.tensor(1.0, dtype=eps_pred.dtype).to(eps_pred.device))
+        norm_loss = self.criterion(sphericity, torch.tensor(2.0, dtype=eps_pred.dtype).to(eps_pred.device))
 
         simple_diff_loss = self.criterion(eps_pred, eps)
 
